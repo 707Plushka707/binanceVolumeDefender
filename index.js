@@ -1,20 +1,28 @@
 //TODO: Если далеко от объема, то не проверяем, чтоб не выходить при отскоке с позиции если его снимают
 //TODO: Скомпилировать для запуска без ноды
+//TODO: Сделать авто переворот при разъедании (on/off) с указанием раб. объема/TP/SL можно в конфиг файле
+//TODO: Просто вход в позицию при разъедании
 ;(async () => {
   const Binance = require('node-binance-api')
   const readline = require('readline')
   const fs = require('fs')
   const path = require('path')
 
-  const {APIKEY, APISECRET} = JSON.parse(fs.readFileSync(path.join(__dirname, '/config.json'), 'utf-8'))
+  const {
+    APIKEY,
+    APISECRET,
+    minVolumeMultiplier,
+    enablePositionReverse
+  } = JSON.parse(fs.readFileSync(path.join(__dirname, '/config.json'), 'utf-8'))
+
   const binance = new Binance().options({
     APIKEY,
     APISECRET,
     useServerTime: true,
-    recvWindow: 60000, // Set a higher recvWindow to increase response timeout
-    verbose: true, // Add extra output when subscribing to WebSockets, etc
+    recvWindow: 60000,
+    verbose: true,
     log: (log) => {
-      console.log(log) // You can create your own logger here, or disable console output
+      console.log(log)
     },
   })
   const rl = readline.createInterface({
@@ -22,8 +30,8 @@
     output: process.stdout
   });
 
-  let cost = '184.50000000'
-  let tiket = 'XMRUSDT'
+  let cost = null
+  let tiket = null
 
   rl.question("Enter a tiket: ", (ans) => {
     tiket = ans.toUpperCase()
@@ -41,13 +49,7 @@
     }
     watch(binance, tiket, cost)
   });
-
-
-  // console.info(await binance.futuresOpenOrders());
-  // console.info( await binance.futuresOpenOrders( "BTCUSDT" ) );
-
 })()
-
 
 function watch(binance, tiket, cost) {
   binance.depth(tiket, (error, depth, symbol) => {
@@ -60,9 +62,9 @@ function watch(binance, tiket, cost) {
     const int = setInterval(() => {
       binance.depth(symbol, (err, depth) => {
         const bidAsk = {...depth.bids, ...depth.asks}
-        if (bidAsk[cost] < curr * 0.5) {
+        if (bidAsk[cost] < curr * +minVolumeMultiplier) {
           console.log('Del pos')
-          // console.info(await binance.futuresCancelAll(symbol));
+          console.info(await binance.futuresCancelAll(symbol));
           clearInterval(int)
         }
       })
