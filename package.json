@@ -1,0 +1,17 @@
+{
+  "name": "binance-fut-position-protection",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ilfar Karimov<ilfatkarimov123@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "node-binance-api": "^0.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.12"
+  }
+}
