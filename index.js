@@ -62,7 +62,7 @@ function watch(binance, tiket, cost) {
         const bidAsk = {...depth.bids, ...depth.asks}
         if (bidAsk[cost] < curr * 0.5) {
           console.log('Del pos')
-          // console.info(await binance.futuresCancelAll(symbol));
+          console.info(await binance.futuresCancelAll(symbol));
           clearInterval(int)
         }
       })
